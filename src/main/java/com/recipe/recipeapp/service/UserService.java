@@ -6,6 +6,7 @@ import com.recipe.recipeapp.dto.RegisterRequest;
 import com.recipe.recipeapp.model.User;
 import com.recipe.recipeapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,6 +14,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public AuthResponse registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -26,7 +30,9 @@ public class UserService {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
+        user.setPassword(hashedPassword);
 
         User savedUser = userRepository.save(user);
 
@@ -40,8 +46,7 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail());
 
         if (user == null
-                || !userRepository.existsByEmail(request.getEmail())
-                || !user.getPassword().equals(request.getPassword())) {
+                  || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 

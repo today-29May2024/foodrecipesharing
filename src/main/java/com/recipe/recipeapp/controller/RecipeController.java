@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/recipes")
-@CrossOrigin(origins = "http://localhost:3000")
 public class RecipeController {
     @Autowired
     private RecipeService recipeService;
